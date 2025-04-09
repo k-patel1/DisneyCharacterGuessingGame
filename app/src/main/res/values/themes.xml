@@ -1,7 +1,10 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
     <style name="Theme.DisneyCharacterGuessingGame" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="android:statusBarColor">?attr/colorPrimary</item>
+        <item name="colorPrimary">@color/disney_purple</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorSurface">@color/background_primary</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="android:statusBarColor">@color/disney_purple</item>
     </style>
 </resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="disney_purple">#BB86FC</color>
+    <color name="background_primary">#FF121212</color> <!-- Dark theme background -->
+    <color name="text_primary">#FFFFFFFF</color> <!-- Dark theme text -->
+</resources>

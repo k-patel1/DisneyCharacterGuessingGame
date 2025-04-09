@@ -1,13 +1,21 @@
 <resources>
-    <string name="app_name">DisneyCharacterGuessingGame</string>
-    <string name="disney_character_guessing_game">Disney Character Guessing Game</string>
+    <string name="app_name">Disney Character Guessing Game</string>
     <string name="start_game">Start Game</string>
     <string name="settings">Settings</string>
     <string name="about">About</string>
-    <string name="score_0_11">Score: 0/11</string>
-    <string name="question_1_of_11">Question 1 of 11</string>
-    <string name="disney_character_silhouette">Disney character silhouette</string>
+    <string name="main_menu">Main Menu</string>
+    <string name="play_again">Play Again</string>
+    <string name="about_text">Created by Kirtan Patel\nMarch 2025</string>
+    <string name="how_to_play">HOW TO PLAY:\n\n• Guess the Disney character shown\n• Select from multiple choices\n• Correct answers turn green\n• Wrong answers turn red\n• You get multiple attempts per question\n• Track your score as you play</string>
+    <string name="select_theme">Select Theme</string>
+    <string name="light_theme">Light Theme</string>
+    <string name="dark_theme">Dark Theme</string>
+    <string name="question_format">Question %1$d of %2$d</string>
+    <string name="score_format">Score: %1$d/%2$d</string>
+    <string name="results_format">You scored %1$d out of %2$d</string>
     <string name="previous">Previous</string>
     <string name="next">Next</string>
-    <string name="disney_character_guessing_game_n_ncreated_by_kirtan_patel_nmarch_2025">Disney Character Guessing Game\n\nCreated by Kirtan Patel\nMarch 2025</string>
+    <string name="character_image_desc">Disney character silhouette</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_about">About</string>
 </resources>
