@@ -23,7 +23,7 @@ public class SettingsActivity extends AppCompatActivity {
         SeekBar attemptsBar = findViewById(R.id.attemptsBar);
         attemptsLabel = findViewById(R.id.attemptsLabel);
 
-        // Set current theme
+
         int currentTheme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
         if (currentTheme == AppCompatDelegate.MODE_NIGHT_YES) {
             themeGroup.check(R.id.radioDark);
@@ -38,7 +38,7 @@ public class SettingsActivity extends AppCompatActivity {
             AppCompatDelegate.setDefaultNightMode(theme);
         });
 
-        // Initialize attempts
+
         int attempts = prefs.getInt("maxAttempts", 1);
         attemptsBar.setMax(2);
         attemptsBar.setProgress(attempts - 1);
@@ -55,12 +55,14 @@ public class SettingsActivity extends AppCompatActivity {
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
+        // Save button
         findViewById(R.id.btnSave).setOnClickListener(v -> {
             int attemptsValue = attemptsBar.getProgress() + 1;
             prefs.edit().putInt("maxAttempts", attemptsValue).apply();
             finish();
         });
 
+        // Home button
         findViewById(R.id.btnHome).setOnClickListener(v -> finish());
     }
 

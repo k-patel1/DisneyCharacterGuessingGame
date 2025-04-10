@@ -13,12 +13,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Apply theme before setContentView
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         int theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
         AppCompatDelegate.setDefaultNightMode(theme);
 
         setContentView(R.layout.activity_main);
+
 
         Button btnStartGame = findViewById(R.id.btnStartGame);
         btnStartGame.setOnClickListener(v ->

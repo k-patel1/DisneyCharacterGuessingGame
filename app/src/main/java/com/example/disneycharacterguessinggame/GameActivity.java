@@ -19,10 +19,13 @@ import java.util.Collections;
 import java.util.List;
 
 public class GameActivity extends AppCompatActivity {
+
     private ImageView characterImage;
     private RadioGroup optionsGroup;
     private TextView questionText, scoreText, attemptsText;
     private Button btnNext, btnPrevious;
+
+    // Game state variables
     private List<Question> questions;
     private int currentQuestionIndex = 0;
     private int score = 0;
@@ -72,7 +75,7 @@ public class GameActivity extends AppCompatActivity {
             attemptsLeft = new int[TOTAL_QUESTIONS];
         }
 
-        // First question gets baseAttempts, others get baseAttempts+1
+        // Initialize attempts for each question
         for (int i = 0; i < TOTAL_QUESTIONS; i++) {
             if (userAnswers == null || userAnswers[i] == null) {
                 attemptsLeft[i] = (i == 0) ? baseAttempts : baseAttempts + 1;
@@ -87,7 +90,6 @@ public class GameActivity extends AppCompatActivity {
         correctAnswers = new String[TOTAL_QUESTIONS];
         attemptsLeft = new int[TOTAL_QUESTIONS];
 
-        // Initialize attempts - Q1 gets baseAttempts, Q2-5 get baseAttempts+1
         for (int i = 0; i < TOTAL_QUESTIONS; i++) {
             correctAnswers[i] = questions.get(i).getCorrectAnswer();
             questionAnswered[i] = false;
@@ -181,6 +183,7 @@ public class GameActivity extends AppCompatActivity {
         optionsGroup.removeAllViews();
         updateAttemptsDisplay();
 
+        // Prepare and shuffle answer options
         List<String> options = new ArrayList<>();
         options.add(question.getCorrectAnswer());
         Collections.addAll(options, question.getWrongOptions());
@@ -276,6 +279,7 @@ public class GameActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 
     private static class Question {
         private final int imageRes;

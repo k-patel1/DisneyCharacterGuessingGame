@@ -12,11 +12,13 @@ public class ResultsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_results);
 
+
         int score = getIntent().getIntExtra("SCORE", 0);
         int total = getIntent().getIntExtra("TOTAL", 0);
 
         TextView resultsText = findViewById(R.id.resultsText);
         resultsText.setText(getString(R.string.results_format, score, total));
+
 
         Button btnPlayAgain = findViewById(R.id.btnPlayAgain);
         Button btnMainMenu = findViewById(R.id.btnMainMenu);
