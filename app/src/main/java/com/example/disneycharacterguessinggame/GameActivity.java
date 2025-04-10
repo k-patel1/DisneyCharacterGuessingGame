@@ -13,6 +13,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,71 +21,101 @@ import java.util.List;
 public class GameActivity extends AppCompatActivity {
     private ImageView characterImage;
     private RadioGroup optionsGroup;
-    private TextView questionText, scoreText;
+    private TextView questionText, scoreText, attemptsText;
     private Button btnNext, btnPrevious;
     private List<Question> questions;
     private int currentQuestionIndex = 0;
     private int score = 0;
-    private boolean[] answered;
+    private boolean[] questionAnswered;
     private String[] userAnswers;
     private String[] correctAnswers;
-    private int maxAttempts = 1;
     private int[] attemptsLeft;
     private static final int TOTAL_QUESTIONS = 5;
+    private int baseAttempts = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
-        SharedPreferences prefs = getSharedPreferences("GamePrefs", MODE_PRIVATE);
-        maxAttempts = prefs.getInt("maxAttempts", 1);
+        initializeViews();
+        loadSettings();
+        initializeNewGame();
+        setupListeners();
+        applyThemeColors();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadSettings();
+        if (questions != null) {
+            showQuestion(currentQuestionIndex);
+        }
+    }
+
+    private void initializeViews() {
         characterImage = findViewById(R.id.characterImage);
         optionsGroup = findViewById(R.id.optionsGroup);
         questionText = findViewById(R.id.questionText);
         scoreText = findViewById(R.id.scoreText);
+        attemptsText = findViewById(R.id.attemptsText);
         btnNext = findViewById(R.id.btnNext);
         btnPrevious = findViewById(R.id.btnPrevious);
+    }
 
+    private void loadSettings() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        baseAttempts = prefs.getInt("maxAttempts", 1);
+
+        if (attemptsLeft == null || attemptsLeft.length != TOTAL_QUESTIONS) {
+            attemptsLeft = new int[TOTAL_QUESTIONS];
+        }
+
+        // First question gets baseAttempts, others get baseAttempts+1
+        for (int i = 0; i < TOTAL_QUESTIONS; i++) {
+            if (userAnswers == null || userAnswers[i] == null) {
+                attemptsLeft[i] = (i == 0) ? baseAttempts : baseAttempts + 1;
+            }
+        }
+    }
+
+    private void initializeNewGame() {
         loadQuestions();
-        answered = new boolean[TOTAL_QUESTIONS];
+        questionAnswered = new boolean[TOTAL_QUESTIONS];
         userAnswers = new String[TOTAL_QUESTIONS];
         correctAnswers = new String[TOTAL_QUESTIONS];
         attemptsLeft = new int[TOTAL_QUESTIONS];
 
+        // Initialize attempts - Q1 gets baseAttempts, Q2-5 get baseAttempts+1
         for (int i = 0; i < TOTAL_QUESTIONS; i++) {
             correctAnswers[i] = questions.get(i).getCorrectAnswer();
-            attemptsLeft[i] = maxAttempts;
+            questionAnswered[i] = false;
+            userAnswers[i] = null;
+            attemptsLeft[i] = (i == 0) ? baseAttempts : baseAttempts + 1;
         }
 
-        applyThemeColors();
+        score = 0;
+        currentQuestionIndex = 0;
         updateScore();
         showQuestion(currentQuestionIndex);
+    }
 
+    private void setupListeners() {
         optionsGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            if (answered[currentQuestionIndex] || checkedId == -1) return;
+            if (questionAnswered[currentQuestionIndex] || checkedId == -1) return;
 
             RadioButton selected = findViewById(checkedId);
             String selectedAnswer = selected.getText().toString();
-            String correctAnswer = correctAnswers[currentQuestionIndex];
-            boolean isCorrect = selectedAnswer.equals(correctAnswer);
-
             userAnswers[currentQuestionIndex] = selectedAnswer;
             attemptsLeft[currentQuestionIndex]--;
 
-            highlightAnswers(correctAnswer, selectedAnswer, isCorrect);
+            updateAttemptsDisplay();
 
-            if (isCorrect) {
-                score++;
-                answered[currentQuestionIndex] = true;
-                updateScore();
-            } else if (attemptsLeft[currentQuestionIndex] <= 0) {
-                answered[currentQuestionIndex] = true;
-            }
-
-            if (answered[currentQuestionIndex]) {
-                lockAnswerSelection();
+            if (selectedAnswer.equals(correctAnswers[currentQuestionIndex])) {
+                handleCorrectAnswer();
+            } else {
+                handleWrongAnswer();
             }
         });
 
@@ -105,45 +136,40 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.game_menu, menu);
-        return true;
+    private void handleCorrectAnswer() {
+        highlightAnswer(true);
+        score++;
+        questionAnswered[currentQuestionIndex] = true;
+        updateScore();
+        lockAnswerSelection();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.menu_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        } else if (id == R.id.menu_about) {
-            startActivity(new Intent(this, AboutActivity.class));
-            return true;
+    private void handleWrongAnswer() {
+        highlightAnswer(false);
+        if (attemptsLeft[currentQuestionIndex] <= 0) {
+            highlightCorrectAnswer();
+            questionAnswered[currentQuestionIndex] = true;
+            lockAnswerSelection();
         }
-        return super.onOptionsItemSelected(item);
     }
 
-    private void highlightAnswers(String correctAnswer, String selectedAnswer, boolean isCorrect) {
+    private void highlightAnswer(boolean isCorrect) {
+        int color = isCorrect ? Color.GREEN : Color.RED;
         for (int i = 0; i < optionsGroup.getChildCount(); i++) {
             RadioButton rb = (RadioButton) optionsGroup.getChildAt(i);
-            String option = rb.getText().toString();
-
-            if (option.equals(correctAnswer)) {
-                rb.setTextColor(Color.GREEN);
-            } else if (!isCorrect && option.equals(selectedAnswer)) {
-                rb.setTextColor(Color.RED);
+            if (rb.getText().equals(userAnswers[currentQuestionIndex])) {
+                rb.setTextColor(color);
             }
         }
     }
 
-    private void applyThemeColors() {
-        int backgroundColor = ContextCompat.getColor(this, R.color.background_primary);
-        int textColor = ContextCompat.getColor(this, R.color.text_primary);
-
-        findViewById(R.id.gameLayout).setBackgroundColor(backgroundColor);
-        questionText.setTextColor(textColor);
-        scoreText.setTextColor(textColor);
+    private void highlightCorrectAnswer() {
+        for (int i = 0; i < optionsGroup.getChildCount(); i++) {
+            RadioButton rb = (RadioButton) optionsGroup.getChildAt(i);
+            if (rb.getText().equals(correctAnswers[currentQuestionIndex])) {
+                rb.setTextColor(Color.GREEN);
+            }
+        }
     }
 
     private void showQuestion(int index) {
@@ -151,12 +177,9 @@ public class GameActivity extends AppCompatActivity {
         characterImage.setImageResource(question.getImageRes());
         questionText.setText(getString(R.string.question_format, index + 1, TOTAL_QUESTIONS));
 
-        if (!answered[index]) {
-            questionText.append("\nAttempts left: " + attemptsLeft[index]);
-        }
-
         optionsGroup.clearCheck();
         optionsGroup.removeAllViews();
+        updateAttemptsDisplay();
 
         List<String> options = new ArrayList<>();
         options.add(question.getCorrectAnswer());
@@ -169,17 +192,33 @@ public class GameActivity extends AppCompatActivity {
             rb.setTextSize(18);
             rb.setPadding(30, 30, 30, 30);
             rb.setTextColor(ContextCompat.getColor(this, R.color.text_primary));
-            rb.setEnabled(!answered[index]);
 
-            if (answered[index]) {
+            if (questionAnswered[index]) {
+                rb.setEnabled(false);
                 if (option.equals(correctAnswers[index])) {
                     rb.setTextColor(Color.GREEN);
                 } else if (option.equals(userAnswers[index])) {
                     rb.setTextColor(Color.RED);
                 }
+            } else {
+                rb.setEnabled(attemptsLeft[index] > 0);
             }
 
             optionsGroup.addView(rb);
+        }
+    }
+
+    private void updateAttemptsDisplay() {
+        attemptsText.setText("Attempts left: " + attemptsLeft[currentQuestionIndex]);
+    }
+
+    private void updateScore() {
+        scoreText.setText("Score: " + score + "/" + TOTAL_QUESTIONS);
+    }
+
+    private void lockAnswerSelection() {
+        for (int i = 0; i < optionsGroup.getChildCount(); i++) {
+            optionsGroup.getChildAt(i).setEnabled(false);
         }
     }
 
@@ -201,14 +240,14 @@ public class GameActivity extends AppCompatActivity {
         questions = allQuestions.subList(0, TOTAL_QUESTIONS);
     }
 
-    private void updateScore() {
-        scoreText.setText(getString(R.string.score_format, score, TOTAL_QUESTIONS));
-    }
+    private void applyThemeColors() {
+        int backgroundColor = ContextCompat.getColor(this, R.color.background_primary);
+        int textColor = ContextCompat.getColor(this, R.color.text_primary);
 
-    private void lockAnswerSelection() {
-        for (int i = 0; i < optionsGroup.getChildCount(); i++) {
-            optionsGroup.getChildAt(i).setEnabled(false);
-        }
+        findViewById(R.id.gameLayout).setBackgroundColor(backgroundColor);
+        questionText.setTextColor(textColor);
+        scoreText.setTextColor(textColor);
+        attemptsText.setTextColor(textColor);
     }
 
     private void showResults() {
@@ -217,6 +256,25 @@ public class GameActivity extends AppCompatActivity {
         intent.putExtra("TOTAL", TOTAL_QUESTIONS);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.game_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.menu_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        } else if (id == R.id.menu_about) {
+            startActivity(new Intent(this, AboutActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private static class Question {

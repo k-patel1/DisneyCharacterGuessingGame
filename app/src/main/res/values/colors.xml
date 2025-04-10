@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="disney_purple">#6200EE</color>
-    <color name="background_primary">#FFF8F0E0</color> <!-- Light theme background -->
-    <color name="text_primary">#FF000000</color> <!-- Light theme text -->
+    <color name="background_primary">#FFF8F0E0</color>
+    <color name="text_primary">#FF000000</color>
 </resources>

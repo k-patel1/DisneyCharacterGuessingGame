@@ -36,9 +36,10 @@
     </RadioGroup>
 
     <TextView
+        android:id="@+id/attemptsLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Number of Attempts"
+        android:text="Number of Attempts: 1"
         android:textSize="20sp"
         android:textColor="?android:attr/textColorPrimary"
         android:layout_marginTop="24dp"/>
@@ -49,14 +50,6 @@
         android:layout_height="wrap_content"
         android:max="2"
         android:progress="0"/>
-
-    <TextView
-        android:id="@+id/attemptsText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Attempts per question: 1"
-        android:textColor="?android:attr/textColorPrimary"
-        android:layout_marginBottom="24dp"/>
 
     <Button
         android:id="@+id/btnSave"
